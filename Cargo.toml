@@ -1,0 +1,13 @@
+[package]
+name = "ghost-cursor"
+version = "0.1.0"
+edition = "2021"
+description = "Generate human-like mouse movements with Bezier curves and Fitts's Law"
+license = "MIT"
+
+[dependencies]
+rand = "0.8"
+playwright = { path = "../playwright-rust" }
+tokio = { version = "1", features = ["sync", "rt-multi-thread", "macros"] }
+
+[dev-dependencies]
