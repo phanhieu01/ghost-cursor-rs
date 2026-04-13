@@ -528,7 +528,7 @@ impl GhostCursor {
             return Err(playwright::Error::ObjectNotFound.into());
         }
 
-        let max_tries = options.max_tries.unwrap_or(10);
+        let max_tries = options.max_tries.unwrap_or(3);
 
         for attempt in 0..=max_tries {
             if !Self::is_element_attached(element).await {

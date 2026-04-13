@@ -132,7 +132,7 @@ impl Default for MoveOptions {
             randomize_move_delay: true,
             max_tries: None,
             spread_override: None,
-            overshoot_threshold: 500.0,
+            overshoot_threshold: 1000.0,
         }
     }
 }
@@ -172,7 +172,7 @@ impl Default for ClickOptions {
             scroll_delay: None,
             in_viewport_margin: None,
             move_speed: None,
-            move_delay: 2000.0,
+            move_delay: 500.0,
             randomize_move_delay: true,
             max_tries: None,
             hesitate: 0.0,
@@ -181,7 +181,7 @@ impl Default for ClickOptions {
             click_count: Some(1),
             misclick_rate: 0.0,
             misclick_distance: 30.0,
-            overshoot_threshold: 500.0,
+            overshoot_threshold: 1000.0,
             spread_override: None,
         }
     }

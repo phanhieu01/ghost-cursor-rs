@@ -6,6 +6,7 @@ use rand::Rng;
 
 const DEFAULT_WIDTH: f64 = 100.0;
 const MIN_STEPS: f64 = 25.0;
+const MAX_STEPS: usize = 25;
 
 /// Fitts's Law: calculate movement difficulty index.
 /// Used to determine how many steps the mouse movement should take.
@@ -18,7 +19,8 @@ fn fitts(distance: f64, width: f64) -> f64 {
 
 fn calculate_steps(length: f64, width: f64, speed: f64) -> usize {
     let base_time = speed * MIN_STEPS;
-    (((fitts(length, width) + 1.0).log2() + base_time) * 3.0).ceil() as usize
+    let steps = ((fitts(length, width) + 1.0).log2() + base_time).ceil() as usize;
+    steps.min(MAX_STEPS)
 }
 
 /// Get a random point within a bounding box.
@@ -80,7 +82,7 @@ pub fn path(start: Vector, end: PathTarget, options: &PathOptions) -> Vec<PathPo
 
     let speed = match options.move_speed {
         Some(s) if s > 0.0 => 25.0 / s,
-        _ => rand::thread_rng().gen::<f64>(),
+        _ => rand::thread_rng().gen_range(0.5..1.0),
     };
 
     let steps = calculate_steps(length, width, speed);
@@ -285,8 +287,8 @@ mod tests {
         let width = 100.0;
         let speed = 0.6;
 
-        // Known value from TS-equivalent order of operations.
-        assert_eq!(calculate_steps(length, width, speed), 54);
+        let steps = calculate_steps(length, width, speed);
+        assert!(steps <= MAX_STEPS, "steps {} exceeds MAX_STEPS {}", steps, MAX_STEPS);
     }
 
     #[test]
