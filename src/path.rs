@@ -4,6 +4,9 @@ use crate::types::{BoundingBox, PathOptions, PathPoint, PathTarget, TimedVector,
 
 use rand::Rng;
 
+const DEFAULT_WIDTH: f64 = 100.0;
+const MIN_STEPS: f64 = 25.0;
+
 /// Fitts's Law: calculate movement difficulty index.
 /// Used to determine how many steps the mouse movement should take.
 fn fitts(distance: f64, width: f64) -> f64 {
@@ -11,6 +14,11 @@ fn fitts(distance: f64, width: f64) -> f64 {
     let b = 2.0;
     let id = (distance / width + 1.0).log2();
     a + b * id
+}
+
+fn calculate_steps(length: f64, width: f64, speed: f64) -> usize {
+    let base_time = speed * MIN_STEPS;
+    (((fitts(length, width) + 1.0).log2() + base_time) * 3.0).ceil() as usize
 }
 
 /// Get a random point within a bounding box.
@@ -57,9 +65,6 @@ pub fn intersects_element(vec: Vector, box_rect: &BoundingBox) -> bool {
 /// # Returns
 /// A vector of path points (with optional timestamps)
 pub fn path(start: Vector, end: PathTarget, options: &PathOptions) -> Vec<PathPoint> {
-    const DEFAULT_WIDTH: f64 = 100.0;
-    const MIN_STEPS: f64 = 25.0;
-
     let width = match &end {
         PathTarget::Box(b) if b.width != 0.0 => b.width,
         _ => DEFAULT_WIDTH,
@@ -67,7 +72,7 @@ pub fn path(start: Vector, end: PathTarget, options: &PathOptions) -> Vec<PathPo
 
     let end_point = match &end {
         PathTarget::Point(v) => *v,
-        PathTarget::Box(b) => Vector { x: b.x + b.width / 2.0, y: b.y + b.height / 2.0 },
+        PathTarget::Box(b) => Vector { x: b.x, y: b.y },
     };
 
     let curve = bezier_curve(start, end_point, options.spread_override);
@@ -78,9 +83,7 @@ pub fn path(start: Vector, end: PathTarget, options: &PathOptions) -> Vec<PathPo
         _ => rand::thread_rng().gen::<f64>(),
     };
 
-    let base_time = speed * MIN_STEPS;
-    let steps = ((fitts(length, width) + 1.0).log2() + base_time * 3.0).ceil() as usize;
-    let steps = steps.max(2);
+    let steps = calculate_steps(length, width, speed);
 
     let mut vectors: Vec<Vector> = curve.get_lut(steps);
 
@@ -109,15 +112,14 @@ fn generate_timestamps(vectors: &[Vector], move_speed: Option<f64>) -> Vec<PathP
 
     let time_to_move = |p0: Vector, p1: Vector, p2: Vector, p3: Vector| -> u64 {
         let mut total = 0.0;
-        let n = samples.max(10);
-        let dt = 1.0 / n as f64;
+        let dt = 1.0 / samples as f64;
+        let mut t = 0.0;
 
-        for i in 0..n {
-            let t = i as f64 * dt;
-            let t_next = (i + 1) as f64 * dt;
-            let v1 = bezier_curve_speed(t_next, p0, p1, p2, p3);
+        while t < 1.0 {
+            let v1 = bezier_curve_speed(t * dt, p0, p1, p2, p3);
             let v2 = bezier_curve_speed(t, p0, p1, p2, p3);
             total += (v1 + v2) * dt / 2.0;
+            t += dt;
         }
         (total / speed).round() as u64
     };
@@ -270,6 +272,21 @@ mod tests {
         let result = path(start, PathTarget::Box(box_target), &options);
         assert!(!result.is_empty());
         assert!(result.len() >= 2);
+
+        // In TS parity mode, BoundingBox pathing uses box x/y (not center).
+        let last = result.last().unwrap();
+        assert!((last.x() - box_target.x).abs() < 1e-6);
+        assert!((last.y() - box_target.y).abs() < 1e-6);
+    }
+
+    #[test]
+    fn test_calculate_steps_matches_ts_formula_order() {
+        let length = 1000.0;
+        let width = 100.0;
+        let speed = 0.6;
+
+        // Known value from TS-equivalent order of operations.
+        assert_eq!(calculate_steps(length, width, speed), 54);
     }
 
     #[test]

@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-04-13T11:04:33.817Z",
+  "generator": "scripts/ts-parity/generate-fixtures.js",
+  "upstream": {
+    "repo": "Xetera/ghost-cursor",
+    "commit": "e45d9b9ee77b60f997f3d9699d5ce31e9a7dffda",
+    "version": "1.4.2"
+  },
+  "cases": [
+    {
+      "case_id": "point_short_spread0",
+      "file": "point_short_spread0.json",
+      "points": 3133,
+      "has_timestamps": false
+    },
+    {
+      "case_id": "point_long_spread0",
+      "file": "point_long_spread0.json",
+      "points": 2094,
+      "has_timestamps": false
+    },
+    {
+      "case_id": "point_timestamp_spread0",
+      "file": "point_timestamp_spread0.json",
+      "points": 2510,
+      "has_timestamps": true
+    },
+    {
+      "case_id": "box_target_default_spread",
+      "file": "box_target_default_spread.json",
+      "points": 2687,
+      "has_timestamps": false
+    },
+    {
+      "case_id": "point_spread_random",
+      "file": "point_spread_random.json",
+      "points": 2895,
+      "has_timestamps": false
+    }
+  ]
+}

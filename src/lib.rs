@@ -8,7 +8,9 @@
 //! ## Quick Start
 //!
 //! ```no_run
-//! use ghost_cursor::{GhostCursor, Vector, PathOptions, PathTarget, path};
+//! use ghost_cursor::{
+//!     ClickOptions, CursorTarget, GhostCursor, GhostCursorOptions, PathOptions, PathTarget, Vector, path,
+//! };
 //!
 //! // Generate movement data between two points (no browser needed)
 //! let start = Vector { x: 100.0, y: 100.0 };
@@ -17,7 +19,18 @@
 //!
 //! // Use with playwright:
 //! // let cursor = GhostCursor::new(page);
-//! // cursor.click_selector("#sign-up button", &ClickOptions::default()).await?;
+//! // cursor.move_target(CursorTarget::Selector("#sign-up button"), None).await?;
+//! // cursor.click_selector("#sign-up button", Some(&ClickOptions::default())).await?;
+//!
+//! // Optional async startup behavior for visible helper / initial random move:
+//! // let cursor = GhostCursor::new_with_options_async(
+//! //     page,
+//! //     GhostCursorOptions {
+//! //         visible: true,
+//! //         perform_random_moves: true,
+//! //         ..Default::default()
+//! //     },
+//! // ).await?;
 //! ```
 
 pub mod bezier;
@@ -26,6 +39,7 @@ pub mod math;
 pub mod path;
 pub mod types;
 
-pub use cursor::GhostCursor;
+#[allow(deprecated)]
+pub use cursor::{create_cursor, CursorTarget, GhostCursor};
 pub use path::path;
 pub use types::*;
